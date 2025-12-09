@@ -12,6 +12,7 @@ const DepressionScreeningQuiz = () => {
     name: '',
     email: '',
     phone: '',
+    location: '',
     message: ''
   });
 
@@ -155,24 +156,53 @@ const DepressionScreeningQuiz = () => {
     }
   };
 
-  const handleFormSubmit = (e) => {
-    // Save the score and user data to cookies before form submits to Formester
+  const handleFormSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    // Save the score and user data to cookies
     const score = calculateScore();
     const results = getResultsMessage(score);
-    
+
     // Create cookies with 24-hour expiry
     const expiryDate = new Date();
     expiryDate.setTime(expiryDate.getTime() + (24 * 60 * 60 * 1000)); // 24 hours
     const expires = `expires=${expiryDate.toUTCString()}`;
-    
+
     document.cookie = `mentalHealthScore=${score}; ${expires}; path=/`;
     document.cookie = `riskLevel=${encodeURIComponent(results.level)}; ${expires}; path=/`;
     document.cookie = `userName=${encodeURIComponent(formData.name)}; ${expires}; path=/`;
     document.cookie = `userEmail=${encodeURIComponent(formData.email)}; ${expires}; path=/`;
     document.cookie = `userPhone=${encodeURIComponent(formData.phone)}; ${expires}; path=/`;
+    document.cookie = `userLocation=${encodeURIComponent(formData.location)}; ${expires}; path=/`;
     document.cookie = `userMessage=${encodeURIComponent(formData.message)}; ${expires}; path=/`;
-    
-    // Let form submit to Formester normally (don't prevent default)
+
+    // Prepare form data for submission
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+      // Submit to Formester via AJAX
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Redirect to static thank you page
+        window.location.href = '/depression-quiz/thankyou.html';
+      } else {
+        console.error('Form submission failed');
+        // Fallback: try to redirect anyway or show error
+        window.location.href = '/depression-quiz/thankyou.html';
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Fallback redirect
+      window.location.href = '/tms-quiz/thankyou.html';
+    }
   };
 
   const handleFormChange = (e) => {
@@ -199,86 +229,26 @@ const DepressionScreeningQuiz = () => {
     }).join('\n\n');
 
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 py-8 px-4">
-        {/* Background Decorative Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-teal-200/20 rounded-full blur-xl"></div>
-          <div className="absolute top-40 right-20 w-48 h-48 bg-emerald-200/20 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-cyan-200/20 rounded-full blur-lg"></div>
+      <div className="max-w-2xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            Almost Done!
+          </h2>
+          <p className="text-gray-600">
+            Enter your details to view your personalized assessment results.
+          </p>
         </div>
 
-        <div className="relative z-10 max-w-2xl mx-auto">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full mb-6 shadow-lg">
-              <SafeIcon icon={FiCheck} className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              🎯 Unlock Your Personalized Insights
-            </h2>
-            <p className="text-xl text-gray-600 leading-relaxed max-w-xl mx-auto">
-              You're just one step away from receiving your comprehensive mental health assessment and expert recommendations.
-            </p>
-          </div>
-
-          {/* Info Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mr-4">
-                  <SafeIcon icon={FiUser} className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">Personal Assessment</h3>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Get a detailed analysis of your mental health screening results with personalized recommendations.
-              </p>
-            </div>
-            
-            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center mr-4">
-                  <SafeIcon icon={FiPhone} className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">Expert Support</h3>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Connect with our licensed mental health professionals for a complimentary discovery call.
-              </p>
-            </div>
-          </div>
-
-          {/* Important Notice */}
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 rounded-xl p-6 mb-8 shadow-sm">
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center mr-4 mt-1 flex-shrink-0">
-                <SafeIcon icon={FiAlertCircle} className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-amber-800 mb-2">📋 What to Expect</h4>
-                <p className="text-amber-700 text-sm leading-relaxed">
-                  After submitting this form, you'll receive your personalized mental health assessment results. 
-                  If you have additional conditions or concerns, please mention them in the message box below. 
-                  Our team offers complimentary discovery calls to help guide your next steps.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact Form */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
-            <div className="bg-gradient-to-r from-teal-600 to-emerald-600 px-8 py-6 text-center">
-              <h3 className="text-2xl font-bold text-white mb-2">📝 Your Information</h3>
-              <p className="text-teal-100">Secure and confidential</p>
-            </div>
-            
-            <form
-              accept-charset='UTF-8'
-              action='https://app.formester.com/forms/MLiLrbkHQ/submissions'
-              method='POST'
-              onSubmit={handleFormSubmit}
-              className="p-8 space-y-6"
-            >
+        {/* Contact Form */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <form
+            acceptCharset='UTF-8'
+            action='https://app.formester.com/forms/MLiLrbkHQ/submissions'
+            method='POST'
+            onSubmit={handleFormSubmit}
+            className="p-6 sm:p-8 space-y-5"
+          >
             {/* Hidden fields for quiz data */}
             <input type="hidden" name="quiz_score" value={score} />
             <input type="hidden" name="quiz_max_score" value="21" />
@@ -299,117 +269,98 @@ const DepressionScreeningQuiz = () => {
               );
             })}
 
-              <div className="relative">
-                <label htmlFor="name" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                  <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center mr-2">
-                    <SafeIcon icon={FiUser} className="w-4 h-4 text-white" />
-                  </div>
-                  Full Name <span className="text-red-500 ml-1">*</span>
-                </label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                    <SafeIcon icon={FiUser} className="w-3 h-3 text-white" />
-                  </div>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleFormChange}
-                    className="w-full pl-12 pr-4 py-4 text-gray-700 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 placeholder-gray-400 shadow-sm hover:border-gray-300"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-              </div>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleFormChange}
+                className="w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                placeholder="Enter your full name"
+              />
+            </div>
 
-              <div className="relative">
-                <label htmlFor="email" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                  <div className="w-6 h-6 bg-emerald-500 rounded-lg flex items-center justify-center mr-2">
-                    <SafeIcon icon={FiMail} className="w-4 h-4 text-white" />
-                  </div>
-                  Email Address <span className="text-red-500 ml-1">*</span>
-                </label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
-                    <SafeIcon icon={FiMail} className="w-3 h-3 text-white" />
-                  </div>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    className="w-full pl-12 pr-4 py-4 text-gray-700 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 placeholder-gray-400 shadow-sm hover:border-gray-300"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-              </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleFormChange}
+                className="w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                placeholder="your.email@example.com"
+              />
+            </div>
 
-              <div className="relative">
-                <label htmlFor="phone" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                  <div className="w-6 h-6 bg-purple-500 rounded-lg flex items-center justify-center mr-2">
-                    <SafeIcon icon={FiPhone} className="w-4 h-4 text-white" />
-                  </div>
-                  Phone Number <span className="text-gray-400 text-xs ml-1">(Optional)</span>
-                </label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                    <SafeIcon icon={FiPhone} className="w-3 h-3 text-white" />
-                  </div>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleFormChange}
-                    className="w-full pl-12 pr-4 py-4 text-gray-700 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 placeholder-gray-400 shadow-sm hover:border-gray-300"
-                    placeholder="(123) 456-7890"
-                  />
-                </div>
-              </div>
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number <span className="text-gray-400 text-xs font-normal ml-1">(Optional)</span>
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleFormChange}
+                className="w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                placeholder="(123) 456-7890"
+              />
+            </div>
 
-              <div className="relative">
-                <label htmlFor="message" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                  <div className="w-6 h-6 bg-orange-500 rounded-lg flex items-center justify-center mr-2">
-                    <SafeIcon icon={FiMail} className="w-4 h-4 text-white" />
-                  </div>
-                  Additional Details <span className="text-gray-400 text-xs ml-1">(Optional)</span>
-                </label>
-                <div className="relative group">
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows="4"
-                    value={formData.message}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-4 text-gray-700 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200 placeholder-gray-400 shadow-sm hover:border-gray-300 resize-none"
-                    placeholder="Tell us about any additional symptoms, concerns, or questions you'd like to share with our team..."
-                  />
-                </div>
-              </div>
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                Location <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                required
+                value={formData.location}
+                onChange={handleFormChange}
+                className="w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors"
+                placeholder="Enter your city/state"
+              />
+            </div>
 
-              {/* Submit Button */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold py-5 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-3 text-lg"
-                >
-                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                    <SafeIcon icon={FiArrowRight} className="w-4 h-4" />
-                  </div>
-                  🚀 Get My Personalized Results
-                </button>
-                
-                {/* Security Notice */}
-                <div className="flex items-center justify-center mt-4 text-xs text-gray-500">
-                  <SafeIcon icon={FiCheck} className="w-4 h-4 mr-2 text-green-500" />
-                  Your information is secure and confidential
-                </div>
-              </div>
-            </form>
-          </div>
+            <div>
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                Additional Details <span className="text-gray-400 text-xs font-normal ml-1">(Optional)</span>
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="3"
+                value={formData.message}
+                onChange={handleFormChange}
+                className="w-full px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors resize-none"
+                placeholder="Any specific concerns?"
+              />
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-sm flex items-center justify-center text-lg"
+              >
+                See My Results
+                <SafeIcon icon={FiArrowRight} className="w-5 h-5 ml-2" />
+              </button>
+
+              <p className="text-center mt-3 text-xs text-gray-500">
+                Your information is secure and confidential.
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     );

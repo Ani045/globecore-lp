@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/test-lp/',
+  base: '/depression-quiz/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
@@ -14,7 +14,7 @@ export default defineConfig({
     port: 3009,
     historyApiFallback: {
       rewrites: [
-        { from: /^\/test-lp\/.*$/, to: '/test-lp/index.html' }
+        { from: /^\/depression-quiz\/.*$/, to: '/depression-quiz/index.html' }
       ]
     },
   },

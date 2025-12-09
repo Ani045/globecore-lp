@@ -34,15 +34,7 @@ const Header = ({ onBookConsultation }) => {
               <span className="sm:hidden">Call</span>
             </button>
 
-            {/* Book Consultation Button */}
-            <button
-              onClick={onBookConsultation}
-              className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 border-2 border-teal-700 text-teal-700 font-semibold rounded-lg hover:bg-teal-50 transition-colors duration-200"
-            >
-              <SafeIcon icon={FiCalendar} className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Book Consultation</span>
-              <span className="sm:hidden">Book</span>
-            </button>
+
           </div>
         </div>
       </div>

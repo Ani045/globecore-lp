@@ -5,9 +5,9 @@ import App from './App.jsx';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
-<StrictMode>
-    <BrowserRouter basename="/test-lp">
-        <App />
-    </BrowserRouter>
-</StrictMode>
+    <StrictMode>
+        <BrowserRouter basename="/depression-quiz">
+            <App />
+        </BrowserRouter>
+    </StrictMode>
 );
